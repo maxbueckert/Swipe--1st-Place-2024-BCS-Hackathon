@@ -1,4 +1,4 @@
-# swipe
+# Swipe -- 2024 BCS Hackathon
 
 # Inspiration
 The idea was sparked by the desire to make digital navigation as natural and intuitive as gesturing during a conversation. We aimed to bridge the gap between human intent and digital response, envisioning a world where your computer understands your hand movements as clearly as your words.
