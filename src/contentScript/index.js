@@ -10,6 +10,8 @@ let throttle = false
 let foundHand = false
 let detectionInterval = null
 let net
+let scrollThrottle = false
+const SCROLL_AMOUNT = 20
 
 // Need to Load TensorFlow Model in to begin
 async function loadModel() {
@@ -126,7 +128,7 @@ const process = (hand) => {
           ) {
             throttle = true
             console.log('Next tab symbol!')
-            chrome.runtime.sendMessage({ action: 'changeTab' }, function (response) {})
+            chrome.runtime.sendMessage({ action: 'nextTab' }, function (response) {})
             setTimeout(() => {
               throttle = false
             }, 1000)
@@ -145,11 +147,47 @@ const process = (hand) => {
             ringTip[1] + TOLERANCE > ringKnuckle[1] &&
             pinkyTip[1] + TOLERANCE > pinkyKnuckle[1]
           ) {
-            throttle = true
-            console.log('Previous tab symbol!')
+            // throttle = true
+            // console.log('Prev tab symbol!')
+            // chrome.runtime.sendMessage({ action: 'prevTab' }, function (response) {})
+            // setTimeout(() => {
+            //   throttle = false
+            // }, 1000)
           }
         }
       }
+    }
+  }
+  if (thumb4[0] < thumb2[0]) {
+    if (
+      indexTip[1] < indexSubTip[1] &&
+      middleTip[1] + TOLERANCE > middleKnuckle[1] &&
+      ringTip[1] + TOLERANCE > ringKnuckle[1] &&
+      pinkyTip[1] + TOLERANCE > pinkyKnuckle[1] &&
+      !scrollThrottle
+    ) {
+      console.log('Scroll up symbol!')
+      scrollThrottle = true
+      window.scrollBy(0, -SCROLL_AMOUNT) // Scrolls up by 100 pixels
+      setTimeout(() => {
+        scrollThrottle = false
+      }, 20)
+    }
+  }
+  if (thumb4[0] < thumb2[0]) {
+    if (
+      indexTip[1] + TOLERANCE > indexKnuckle[1] &&
+      middleTip[1] + TOLERANCE > middleKnuckle[1] &&
+      ringTip[1] + TOLERANCE > ringKnuckle[1] &&
+      pinkyTip[1] < pinkySubTip[1] &&
+      !scrollThrottle
+    ) {
+      console.log('Scroll down symbol!')
+      scrollThrottle = true
+      window.scrollBy(0, SCROLL_AMOUNT) // Scrolls down by 100 pixels
+      setTimeout(() => {
+        scrollThrottle = false
+      }, 20)
     }
   }
 }

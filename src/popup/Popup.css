@@ -51,3 +51,47 @@ a {
   color: #cccccc;
   text-decoration: none;
 }
+
+.text-style {
+  color: #61dafb;
+  text-transform: uppercase;
+  font-weight: 200;
+  margin: 2rem auto;
+  text-align: center;
+}
+
+.text-style {
+  color: #61dafb;
+  text-transform: uppercase;
+  font-weight: 200;
+  margin: 1rem auto; /* Adjusted for more standard spacing */
+  text-align: center;
+}
+
+.h1-style {
+  font-size: 2rem; /* Slightly smaller for better fit on various devices */
+  line-height: 2.4rem; /* Adjusted for optimal readability */
+}
+
+.h2-style {
+  font-size: 1.2rem; /* Refined for clear hierarchy */
+  line-height: 1.8rem; /* Enhanced line height for readability */
+}
+
+.h3-style {
+  font-size: 1.2rem; /* Fine-tuned for subheadings */
+  line-height: 1.5rem; /* Optimized line height */
+}
+
+.p-style {
+  font-size: 1rem; /* Standard readable size for paragraph */
+  line-height: 1.4rem; /* Comfortable reading line height */
+  text-transform: none; /* Remove uppercase for paragraph for readability */
+}
+
+/* Resetting margins for heading elements to ensure consistent spacing */
+header,
+h2,
+section {
+  margin: 1.5rem auto;
+}
