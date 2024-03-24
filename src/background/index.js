@@ -92,7 +92,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             return true
           }
 
-          let adjustment = request.action === 'zoomIn' ? 0.1 : -0.1
+          let adjustment = request.action === 'zoomIn' ? 0.05 : -0.05
           let newZoomFactor = currentZoomFactor + adjustment
           // Set the new zoom factor
           chrome.tabs.setZoom(currentTabId, newZoomFactor, function () {

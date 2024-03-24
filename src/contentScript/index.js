@@ -81,75 +81,89 @@ async function detect(net) {
 }
 
 const handleNextTab = (hand) => {
-  const TOLERANCE = Math.abs(hand[0].landmarks[0][0] - hand[0].landmarks[1][0]) / 3
+  const TOLERANCE = 20
   const palm = hand[0].landmarks[0]
   const thumb1 = hand[0].landmarks[1]
   const thumb2 = hand[0].landmarks[2]
   const thumb3 = hand[0].landmarks[3]
   const thumb4 = hand[0].landmarks[4]
   const indexKnuckle = hand[0].landmarks[5]
-  const middleKnuckle = hand[0].landmarks[9]
-  const ringKnuckle = hand[0].landmarks[13]
-  const pinkyKnuckle = hand[0].landmarks[17]
+  const indexPostKnuckle = hand[0].landmarks[6]
   const indexSubTip = hand[0].landmarks[7]
   const indexTip = hand[0].landmarks[8]
+  const middleKnuckle = hand[0].landmarks[9]
   const middleSubTip = hand[0].landmarks[11]
   const middleTip = hand[0].landmarks[12]
+  const ringKnuckle = hand[0].landmarks[13]
   const ringSubTip = hand[0].landmarks[15]
   const ringTip = hand[0].landmarks[16]
+  const pinkyKnuckle = hand[0].landmarks[17]
   const pinkySubTip = hand[0].landmarks[19]
   const pinkyTip = hand[0].landmarks[20]
-  if (thumb4[0] < thumb3[0] && thumb4[1] < thumb3[1]) {
-    if (thumb3[0] < thumb2[0] && thumb3[1] < thumb2[1]) {
-      if (thumb2[0] < thumb1[0] && thumb2[1] < thumb1[1]) {
-        if (thumb1[0] < palm[0] && thumb1[1] < palm[1]) {
-          if (
-            indexTip[1] + TOLERANCE > indexKnuckle[1] &&
-            middleTip[1] + TOLERANCE > middleKnuckle[1] &&
-            ringTip[1] + TOLERANCE > ringKnuckle[1] &&
-            pinkyTip[1] + TOLERANCE > pinkyKnuckle[1]
-          ) {
-            throttle = true
-            console.log('Next tab symbol!')
-            chrome.runtime.sendMessage({ action: 'nextTab' }, function (response) {})
-            setTimeout(() => {
-              throttle = false
-            }, 1000)
-          }
-        }
-      }
-    }
+
+  const thumbExtendedToRight =
+    thumb4[0] < thumb3[0] &&
+    thumb4[1] < thumb3[1] &&
+    thumb3[0] < thumb2[0] &&
+    thumb3[1] < thumb2[1] &&
+    thumb2[0] < thumb1[0] &&
+    thumb2[1] < thumb1[1] &&
+    thumb1[0] < palm[0] &&
+    thumb1[1] < palm[1]
+  const thumbRightOfKnuckel = thumb4[0] + TOLERANCE * 3 < indexKnuckle[0]
+  const allFingersFoldedDown =
+    indexTip[1] + TOLERANCE > indexKnuckle[1] &&
+    middleTip[1] + TOLERANCE > middleKnuckle[1] &&
+    ringTip[1] + TOLERANCE > ringKnuckle[1] &&
+    pinkyTip[1] + TOLERANCE > pinkyKnuckle[1]
+  if (thumbExtendedToRight && allFingersFoldedDown && thumbRightOfKnuckel) {
+    console.log('Next tab symbol!')
+    throttle = true
+    console.log('Next tab symbol!')
+    chrome.runtime.sendMessage({ action: 'nextTab' }, function (response) {})
+    setTimeout(() => {
+      throttle = false
+    }, 1000)
   }
 }
 
 const handlePrevTab = (hand) => {
-  let thumb = [hand[0].landmarks[1], hand[0].landmarks[4]]
-  let index = [hand[0].landmarks[5], hand[0].landmarks[8]]
-  let middle = [hand[0].landmarks[9], hand[0].landmarks[12]]
-  let ring = [hand[0].landmarks[13], hand[0].landmarks[16]]
-  let pinky = [hand[0].landmarks[17], hand[0].landmarks[20]]
-  let mainFingers = [index, middle, ring, pinky]
+  const TOLERANCE = 20
+  const palm = hand[0].landmarks[0]
+  const thumb1 = hand[0].landmarks[1]
+  const thumb2 = hand[0].landmarks[2]
+  const thumb3 = hand[0].landmarks[3]
+  const thumb4 = hand[0].landmarks[4]
+  const indexKnuckle = hand[0].landmarks[5]
+  const indexPostKnuckle = hand[0].landmarks[6]
+  const indexSubTip = hand[0].landmarks[7]
+  const indexTip = hand[0].landmarks[8]
+  const middleKnuckle = hand[0].landmarks[9]
+  const middleSubTip = hand[0].landmarks[11]
+  const middleTip = hand[0].landmarks[12]
+  const ringKnuckle = hand[0].landmarks[13]
+  const ringSubTip = hand[0].landmarks[15]
+  const ringTip = hand[0].landmarks[16]
+  const pinkyKnuckle = hand[0].landmarks[17]
+  const pinkySubTip = hand[0].landmarks[19]
+  const pinkyTip = hand[0].landmarks[20]
+  const thumbExtendedToLeft =
+    thumb4[0] > thumb3[0] &&
+    thumb4[1] < thumb3[1] &&
+    thumb3[0] > thumb2[0] &&
+    thumb3[1] < thumb2[1] &&
+    thumb2[0] > thumb1[0] &&
+    thumb2[1] < thumb1[1] &&
+    thumb1[0] > palm[0] &&
+    thumb1[1] < palm[1]
+  const thumbLeftOfKnuckel = thumb4[0] > indexPostKnuckle[0] + TOLERANCE * 3
+  const allFingersFoldedDown =
+    indexTip[1] + TOLERANCE > indexKnuckle[1] &&
+    middleTip[1] + TOLERANCE > middleKnuckle[1] &&
+    ringTip[1] + TOLERANCE > ringKnuckle[1] &&
+    pinkyTip[1] + TOLERANCE > pinkyKnuckle[1]
 
-  let downDirection = [0, -1]
-  let rightDirection = [1, 0.25]
-  let leftDirection = [-1, 0]
-
-  const getAngle = (fromto, dir) => {
-    let vector = [fromto[0][0] - fromto[1][0], fromto[0][1] - fromto[1][1]] // <x2-x1, y2-y1>
-    let vectorLength = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
-    let normVector = [vector[0] / vectorLength, vector[1] / vectorLength]
-    let direction = math.dot(normVector, dir) // costheta of vector and down
-    let angle = math.acos(direction)
-    return angle
-  }
-  // check thumb
-  let isLeftTab = getAngle(thumb, leftDirection) < 1.5
-  // check fingers
-  for (const finger of mainFingers) {
-    isLeftTab = isLeftTab && math.abs(getAngle(finger, downDirection)) < 1.5
-  }
-
-  if (isLeftTab) {
+  if (thumbExtendedToLeft && allFingersFoldedDown && thumbLeftOfKnuckel) {
     throttle = true
     console.log('Prev tab symbol!')
     chrome.runtime.sendMessage({ action: 'prevTab' }, function (response) {})
@@ -160,7 +174,7 @@ const handlePrevTab = (hand) => {
 }
 
 const handleScrollUp = (hand) => {
-  const TOLERANCE = Math.abs(hand[0].landmarks[0][0] - hand[0].landmarks[1][0]) / 3
+  const TOLERANCE = 20
   const palm = hand[0].landmarks[0]
   const thumb1 = hand[0].landmarks[1]
   const thumb2 = hand[0].landmarks[2]
@@ -202,7 +216,7 @@ const handleScrollUp = (hand) => {
 }
 
 const handleScrollDown = (hand) => {
-  const TOLERANCE = Math.abs(hand[0].landmarks[0][0] - hand[0].landmarks[1][0]) / 3
+  const TOLERANCE = 20
   const palm = hand[0].landmarks[0]
   const thumb1 = hand[0].landmarks[1]
   const thumb2 = hand[0].landmarks[2]
@@ -244,85 +258,249 @@ const handleScrollDown = (hand) => {
 }
 
 const handleZoomIn = (hand) => {
-  const TOLERANCE = Math.abs(hand[0].landmarks[0][0] - hand[0].landmarks[1][0]) / 3
-  const palm = hand[0].landmarks[0]
-  const thumb1 = hand[0].landmarks[1]
-  const thumb2 = hand[0].landmarks[2]
-  const thumb3 = hand[0].landmarks[3]
-  const thumb4 = hand[0].landmarks[4]
-  const indexKnuckle = hand[0].landmarks[5]
+  const LOWER_TOLERANCE = 30 * 1.3
+  const UPPER_TOLERANCE = 10 * 1.3
+  const x = 0
+  const y = 1
+  const pointer1 = hand[0].landmarks[8]
+  const pointer2 = hand[0].landmarks[7]
+  const pointer3 = hand[0].landmarks[6]
+  const pointerKnuckle = hand[0].landmarks[5]
+
+  const middle1 = hand[0].landmarks[12]
+  const middle2 = hand[0].landmarks[11]
+  const middle3 = hand[0].landmarks[10]
   const middleKnuckle = hand[0].landmarks[9]
+
+  const ring1 = hand[0].landmarks[16]
+  const ring2 = hand[0].landmarks[15]
+  const ring3 = hand[0].landmarks[14]
   const ringKnuckle = hand[0].landmarks[13]
+
+  const pinky1 = hand[0].landmarks[20]
+  const pinky2 = hand[0].landmarks[19]
+  const pinky3 = hand[0].landmarks[18]
   const pinkyKnuckle = hand[0].landmarks[17]
-  const indexSubTip = hand[0].landmarks[7]
-  const indexTip = hand[0].landmarks[8]
-  const middleSubTip = hand[0].landmarks[11]
-  const middleTip = hand[0].landmarks[12]
-  const ringSubTip = hand[0].landmarks[15]
-  const ringTip = hand[0].landmarks[16]
-  const pinkySubTip = hand[0].landmarks[19]
-  const pinkyTip = hand[0].landmarks[20]
-  if (thumb4[0] < thumb2[0]) {
-    if (
-      indexTip[1] < indexSubTip[1] &&
-      middleTip[1] + TOLERANCE > middleKnuckle[1] &&
-      ringTip[1] + TOLERANCE > ringKnuckle[1] &&
-      pinkyTip[1] + TOLERANCE > pinkyKnuckle[1] &&
-      !zoomThrottle
-    ) {
-      console.log('Zoom in')
-      zoomThrottle = true
-      chrome.runtime.sendMessage({ action: 'zoomIn' })
-      setTimeout(() => {
-        zoomThrottle = false
-      }, 20)
-    }
+
+  const thumb1 = hand[0].landmarks[4]
+  const thumb2 = hand[0].landmarks[3]
+  const thumbKnuckle = hand[0].landmarks[2]
+
+  const isRightHandForward = thumbKnuckle[x] > pinkyKnuckle[x]
+  const isPointerClenched =
+    (pointer1[y] > pointerKnuckle[y] &&
+      Math.abs(pointer1[y] - pointerKnuckle[y]) <= LOWER_TOLERANCE) ||
+    Math.abs(pointerKnuckle[y] - pointer1[y]) <= UPPER_TOLERANCE
+  const isMiddleClenched =
+    (middle1[y] > middleKnuckle[y] && Math.abs(middle1[y] - middleKnuckle[y]) <= LOWER_TOLERANCE) ||
+    Math.abs(pointerKnuckle[y] - pointer1[y]) <= UPPER_TOLERANCE
+  const isRingClenched =
+    (ring1[y] > ringKnuckle[y] && Math.abs(ring1[y] - ringKnuckle[y]) <= LOWER_TOLERANCE) ||
+    Math.abs(pointerKnuckle[y] - pointer1[y]) <= UPPER_TOLERANCE
+  const isPinkyClenched =
+    (pinky1[y] > pinkyKnuckle[y] && Math.abs(pinky1[y] - pinkyKnuckle[y]) <= LOWER_TOLERANCE) ||
+    Math.abs(pointerKnuckle[y] - pointer1[y]) <= UPPER_TOLERANCE
+  const { xMin, yMin } = getMinFingerVertices()
+  const { xMax, yMax } = getMaxFingerVertices()
+  const isThumbWithinBounds =
+    xMin < thumb1[x] && thumb1[x] < xMax && yMin < thumb1[y] && thumb1[y] < yMax
+  const isHandClosed =
+    isPointerClenched &&
+    isMiddleClenched &&
+    isRingClenched &&
+    isPinkyClenched &&
+    isThumbWithinBounds &&
+    isRightHandForward
+
+  if (isHandClosed) {
+    console.log('Zoom in')
+    zoomThrottle = true
+    chrome.runtime.sendMessage({ action: 'zoomIn' })
+    setTimeout(() => {
+      zoomThrottle = false
+    }, 20)
   }
+
+  function getMinFingerVertices() {
+    const fingers = [
+      pointer1,
+      pointer2,
+      pointer3,
+      middle1,
+      middle2,
+      middle3,
+      ring1,
+      ring2,
+      ring3,
+      pinky1,
+      pinky2,
+      pinky3,
+    ]
+    let xMin = fingers[0][x]
+    let yMin = fingers[0][y]
+    fingers.forEach((finger) => {
+      xMin = finger[x] < xMin ? finger[x] : xMin
+      yMin = finger[y] < yMin ? finger[y] : yMin
+    })
+    return { xMin: xMin, yMin: yMin }
+  }
+
+  function getMaxFingerVertices() {
+    const fingers = [
+      pointer1,
+      pointer2,
+      pointer3,
+      middle1,
+      middle2,
+      middle3,
+      ring1,
+      ring2,
+      ring3,
+      pinky1,
+      pinky2,
+      pinky3,
+    ]
+    let xMax = fingers[0][x]
+    let yMax = fingers[0][y]
+    fingers.forEach((finger) => {
+      xMax = finger[x] > xMax ? finger[x] : xMax
+      yMax = finger[y] > yMax ? finger[y] : yMax
+    })
+    return { xMax: xMax, yMax: yMax }
+  }
+  // const TOLERANCE = 20
+  // const palm = hand[0].landmarks[0]
+  // const thumb1 = hand[0].landmarks[1]
+  // const thumb2 = hand[0].landmarks[2]
+  // const thumb3 = hand[0].landmarks[3]
+  // const thumb4 = hand[0].landmarks[4]
+  // const indexKnuckle = hand[0].landmarks[5]
+  // const middleKnuckle = hand[0].landmarks[9]
+  // const ringKnuckle = hand[0].landmarks[13]
+  // const pinkyKnuckle = hand[0].landmarks[17]
+  // const indexSubTip = hand[0].landmarks[7]
+  // const indexTip = hand[0].landmarks[8]
+  // const middleSubTip = hand[0].landmarks[11]
+  // const middleTip = hand[0].landmarks[12]
+  // const ringSubTip = hand[0].landmarks[15]
+  // const ringTip = hand[0].landmarks[16]
+  // const pinkySubTip = hand[0].landmarks[19]
+  // const pinkyTip = hand[0].landmarks[20]
+  // if (thumb4[0] < thumb2[0]) {
+  //   if (
+  //     indexTip[1] < indexSubTip[1] &&
+  //     middleTip[1] + TOLERANCE > middleKnuckle[1] &&
+  //     ringTip[1] + TOLERANCE > ringKnuckle[1] &&
+  //     pinkyTip[1] + TOLERANCE > pinkyKnuckle[1] &&
+  //     !zoomThrottle
+  //   ) {
+  // console.log('Zoom in')
+  // zoomThrottle = true
+  // chrome.runtime.sendMessage({ action: 'zoomIn' })
+  // setTimeout(() => {
+  //   zoomThrottle = false
+  // }, 20)
+  //   }
+  // }
 }
 
 const handleZoomOut = (hand) => {
-  const TOLERANCE = Math.abs(hand[0].landmarks[0][0] - hand[0].landmarks[1][0]) / 3
-  const palm = hand[0].landmarks[0]
-  const thumb1 = hand[0].landmarks[1]
-  const thumb2 = hand[0].landmarks[2]
-  const thumb3 = hand[0].landmarks[3]
-  const thumb4 = hand[0].landmarks[4]
-  const indexKnuckle = hand[0].landmarks[5]
+  const LOWER_TOLERANCE = 30
+  const UPPER_TOLERANCE = 10
+  const x = 0
+  const y = 1
+  const pointer1 = hand[0].landmarks[8]
+  const pointer2 = hand[0].landmarks[7]
+  const pointer3 = hand[0].landmarks[6]
+  const pointerKnuckle = hand[0].landmarks[5]
+
+  const middle1 = hand[0].landmarks[12]
+  const middle2 = hand[0].landmarks[11]
+  const middle3 = hand[0].landmarks[10]
   const middleKnuckle = hand[0].landmarks[9]
+
+  const ring1 = hand[0].landmarks[16]
+  const ring2 = hand[0].landmarks[15]
+  const ring3 = hand[0].landmarks[14]
   const ringKnuckle = hand[0].landmarks[13]
+
+  const pinky1 = hand[0].landmarks[20]
+  const pinky2 = hand[0].landmarks[19]
+  const pinky3 = hand[0].landmarks[18]
   const pinkyKnuckle = hand[0].landmarks[17]
-  const indexSubTip = hand[0].landmarks[7]
-  const indexTip = hand[0].landmarks[8]
-  const middleSubTip = hand[0].landmarks[11]
-  const middleTip = hand[0].landmarks[12]
-  const ringSubTip = hand[0].landmarks[15]
-  const ringTip = hand[0].landmarks[16]
-  const pinkySubTip = hand[0].landmarks[19]
-  const pinkyTip = hand[0].landmarks[20]
-  if (thumb4[0] < thumb2[0]) {
-    if (
-      indexTip[1] + TOLERANCE > indexKnuckle[1] &&
-      middleTip[1] + TOLERANCE > middleKnuckle[1] &&
-      ringTip[1] + TOLERANCE > ringKnuckle[1] &&
-      pinkyTip[1] < pinkySubTip[1] &&
-      !zoomThrottle
-    ) {
-      console.log('Zoom in')
-      zoomThrottle = true
-      chrome.runtime.sendMessage({ action: 'zoomOut' })
-      setTimeout(() => {
-        zoomThrottle = false
-      }, 20)
-    }
+
+  const thumb1 = hand[0].landmarks[4]
+  const thumb2 = hand[0].landmarks[3]
+  const thumbKnuckle = hand[0].landmarks[2]
+
+  const isPointerUp =
+    pointer1[y] < pointer2[y] && pointer2[y] < pointer3[y] && pointer3[y] < pointerKnuckle[y]
+  const isMiddleUp =
+    middle1[y] < middle2[y] && middle2[y] < middle3[y] && middle3[y] < middleKnuckle[y]
+  const isRingUp = ring1[y] < ring2[y] && ring2[y] < ring3[y] && ring3[y] < ringKnuckle[y]
+  const isPinkyUp = pinky1[y] < pinky2[y] && pinky2[y] < pinky3[y] && pinky3[y] < pinkyKnuckle[y]
+  const isThumbUp = thumb1[y] < thumb2[y] && thumb2[y] < thumbKnuckle[y]
+  const isThumbLeft = thumb1[x] > thumb2[x] && thumb2[x] > thumbKnuckle[x]
+  const isRightHandForward = thumbKnuckle[x] > pinkyKnuckle[x]
+
+  if (
+    isPointerUp &&
+    isMiddleUp &&
+    isRingUp &&
+    isPinkyUp &&
+    isThumbUp &&
+    isThumbLeft &&
+    isRightHandForward
+  ) {
+    console.log('Zoom out')
+    zoomThrottle = true
+    chrome.runtime.sendMessage({ action: 'zoomOut' })
+    setTimeout(() => {
+      zoomThrottle = false
+    }, 20)
   }
+  // const TOLERANCE = 20
+  // const palm = hand[0].landmarks[0]
+  // const thumb1 = hand[0].landmarks[1]
+  // const thumb2 = hand[0].landmarks[2]
+  // const thumb3 = hand[0].landmarks[3]
+  // const thumb4 = hand[0].landmarks[4]
+  // const indexKnuckle = hand[0].landmarks[5]
+  // const middleKnuckle = hand[0].landmarks[9]
+  // const ringKnuckle = hand[0].landmarks[13]
+  // const pinkyKnuckle = hand[0].landmarks[17]
+  // const indexSubTip = hand[0].landmarks[7]
+  // const indexTip = hand[0].landmarks[8]
+  // const middleSubTip = hand[0].landmarks[11]
+  // const middleTip = hand[0].landmarks[12]
+  // const ringSubTip = hand[0].landmarks[15]
+  // const ringTip = hand[0].landmarks[16]
+  // const pinkySubTip = hand[0].landmarks[19]
+  // const pinkyTip = hand[0].landmarks[20]
+  // if (thumb4[0] < thumb2[0]) {
+  //   if (
+  //     indexTip[1] + TOLERANCE > indexKnuckle[1] &&
+  //     middleTip[1] + TOLERANCE > middleKnuckle[1] &&
+  //     ringTip[1] + TOLERANCE > ringKnuckle[1] &&
+  //     pinkyTip[1] < pinkySubTip[1] &&
+  //     !zoomThrottle
+  //   ) {
+  // console.log('Zoom out')
+  // zoomThrottle = true
+  // chrome.runtime.sendMessage({ action: 'zoomOut' })
+  // setTimeout(() => {
+  //   zoomThrottle = false
+  // }, 20)
+  //   }
+  // }
 }
 
 const process = (hand) => {
   handleNextTab(hand)
   handleZoomIn(hand)
   handleZoomOut(hand)
-  //   handleScrollUp()
-  //   handleScrollDown()
+  handleScrollUp(hand)
+  handleScrollDown(hand)
   handlePrevTab(hand)
 }
 
