@@ -6,6 +6,15 @@ The idea was sparked by the desire to make digital navigation as natural and int
 ## What it does
 Our Chrome extension uses a sophisticated TensorFlow hand-pose model to detect and interpret specific hand gestures via your webcam, translating them into common browser commands like scrolling, zooming, and tab switching. This creates a seamless, hands-on browsing experience without the need for a mouse or keyboard.
 
+[Watch a demo here](https://www.youtube.com/watch?v=LBj3UQgiR1Y)
+
+<!-- Resizing image to 200x200 pixels -->
+<img src="https://github.com/maxbueckert/Swipe/assets/122507377/7fdad400-2d84-4e96-b692-561c5f740c66" width="400" height="255">
+
+<!-- Resizing image to 100x100 pixels -->
+<img src="https://github.com/maxbueckert/Swipe/assets/122507377/bc943ab5-9d39-43ee-b2a3-92e0a4e5d829" width="400" height="255">
+
+
 ### How we built it
 We harnessed the capabilities of TensorFlow's hand-pose model, integrating it with a Chrome extension framework. The extension processes live video feed from the webcam, analyzing hand positions and movements. Through meticulous programming and optimization, we mapped specific gestures to browser actions, ensuring a smooth and responsive user experience.
 
