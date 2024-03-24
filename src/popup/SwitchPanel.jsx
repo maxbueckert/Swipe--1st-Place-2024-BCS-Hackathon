@@ -11,49 +11,65 @@ import SwipeLeftAltIcon from '@mui/icons-material/SwipeLeftAlt'
 import SwipeRightAltIcon from '@mui/icons-material/SwipeRightAlt'
 import SwipeDownAltIcon from '@mui/icons-material/SwipeDownAlt'
 import SwipeUpAltIcon from '@mui/icons-material/SwipeUpAlt'
-import { Preview, PreviewTwoTone } from '@mui/icons-material'
+import ZoomOutIcon from '@mui/icons-material/ZoomOut'
+import ZoomInIcon from '@mui/icons-material/ZoomIn'
 
 export default function SwitchListSecondary() {
   const [left, setLeft] = React.useState(null)
   const [right, setRight] = React.useState(null)
   const [up, setUp] = React.useState(null)
   const [down, setDown] = React.useState(null)
+  const [zin, setIn] = React.useState(null)
+  const [zout, setOut] = React.useState(null)
   const [firstRender, setFirstRender] = React.useState(true)
-
-  //   console.log('here')
 
   // Change global state
   React.useEffect(() => {
     console.log('sending')
     const changeState = async () => {
-      if (left !== null && right !== null && up !== null && down !== null) {
-        chrome.storage.sync.set({ left: left, right: right, up: up, down: down }, function () {
-          if (chrome.runtime.lastError) {
-            console.log(`Error setting values: ${chrome.runtime.lastError}`)
-          }
-        })
+      if (
+        left !== null &&
+        right !== null &&
+        up !== null &&
+        down !== null &&
+        zin !== null &&
+        zout !== null
+      ) {
+        chrome.storage.sync.set(
+          { left: left, right: right, up: up, down: down, zin: zin, zout: zout },
+          function () {
+            if (chrome.runtime.lastError) {
+              console.log(`Error setting values: ${chrome.runtime.lastError}`)
+            }
+          },
+        )
         console.log('sent')
-        const result = chrome.storage.sync.get(['left', 'right', 'up', 'down'], (result) => {
-          console.log('sent result')
-          console.log(result)
-        })
+        // const result = chrome.storage.sync.get(['left', 'right', 'up', 'down'], (result) => {
+        //   console.log('sent result')
+        //   console.log(result)
+        // })
       }
     }
     changeState()
-  }, [left, right, up, down])
+  }, [left, right, up, down, zin, zout])
 
   React.useEffect(() => {
     const restoreState = async () => {
       if (firstRender) {
         console.log('initial retrieve async')
-        const result = chrome.storage.sync.get(['left', 'right', 'up', 'down'], (result) => {
-          console.log('fresh result')
-          console.log(result)
-          setLeft(result.left || false)
-          setRight(result.right || false)
-          setUp(result.up || false)
-          setDown(result.down || false)
-        })
+        const result = chrome.storage.sync.get(
+          ['left', 'right', 'up', 'down', 'zin', 'zout'],
+          (result) => {
+            console.log('fresh result')
+            console.log(result)
+            setLeft(result.left || false)
+            setRight(result.right || false)
+            setUp(result.up || false)
+            setDown(result.down || false)
+            setIn(result.zin || false)
+            setOut(result.zout || false)
+          },
+        )
       }
       setFirstRender(false)
     }
@@ -61,7 +77,7 @@ export default function SwitchListSecondary() {
   }, [firstRender])
   //   console.log(chrome.storage.local.set({ left, right, up, down }))
 
-  return up === null || down === null || right === null || left === null ? null : (
+  return (
     <List sx={{ width: '100%', maxWidth: 360 }}>
       <ListItem>
         <ListItemIcon>
@@ -121,6 +137,34 @@ export default function SwitchListSecondary() {
           edge="end"
           onChange={() => setUp((prev) => !prev)}
           checked={up}
+          inputProps={{
+            'aria-labelledby': 'switch-list-label-wifi',
+          }}
+        />
+      </ListItem>
+      <ListItem>
+        <ListItemIcon>
+          <ZoomInIcon sx={{ color: 'grey' }} />
+        </ListItemIcon>
+        <ListItemText sx={{ color: '#61dafb' }} id="switch-list-label-wifi" primary="Zoom In" />
+        <Switch
+          edge="end"
+          onChange={() => setIn((prev) => !prev)}
+          checked={zin}
+          inputProps={{
+            'aria-labelledby': 'switch-list-label-wifi',
+          }}
+        />
+      </ListItem>{' '}
+      <ListItem>
+        <ListItemIcon>
+          <ZoomOutIcon sx={{ color: 'grey' }} />
+        </ListItemIcon>
+        <ListItemText sx={{ color: '#61dafb' }} id="switch-list-label-wifi" primary="Zoom Out" />
+        <Switch
+          edge="end"
+          onChange={() => setOut((prev) => !prev)}
+          checked={zout}
           inputProps={{
             'aria-labelledby': 'switch-list-label-wifi',
           }}

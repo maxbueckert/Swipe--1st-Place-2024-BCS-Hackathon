@@ -26,16 +26,17 @@ export const Popup = () => {
   }, [count])
 
   return (
-    <main>
-      <header class="text-style h1-style">Swipe</header>
-      <h2 class="text-style h2-style">Intuitive Gesture Control for Your Browser</h2>
+    <main style={{ flex: 1 }}>
+      <header class="text-style h1-style">swipe</header>
+      <h2 class="text-style h2-style">Intuitive Gesture Control</h2>
       <section>
         <p class="text-style p-style">
           Navigate, zoom, and scroll with simple gestures. Experience seamless browsing without
-          touching a mouse or keyboard.
+          touching a mouse or keyboard
         </p>
       </section>
       <SwitchPanel></SwitchPanel>
+      <footer className="popup-footer">Swipe 2024 ©</footer>
     </main>
   )
 }

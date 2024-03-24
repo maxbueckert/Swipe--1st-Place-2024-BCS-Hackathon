@@ -8,13 +8,13 @@ const downENabled = false
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   // console.log('here')
-  chrome.storage.sync.get(['left', 'right', 'up', 'down'], (result) => {
+  chrome.storage.sync.get(['left', 'right', 'up', 'down', 'zin', 'zout'], (result) => {
     console.log('result')
     console.log(result)
     let left = result.left || false
     let right = result.right || false
-    let up = result.up || false
-    let down = result.down || false
+    let zin = result.zin || false
+    let zout = result.zout || false
 
     if (request.action === 'nextTab' && !isThrottled && right) {
       console.log('background script notified')
@@ -80,10 +80,34 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       }, throttleDuration)
 
       return true // Indicates an asynchronous response
-    } else if (request.action === 'changeTab' && isThrottled) {
-      // Optionally, send a response immediately if the request is throttled
-      sendResponse({ result: 'Request throttled' })
-      return true // This return is necessary if you're sending a response
+    }
+    if (request.action === 'zoomIn' || request.action === 'zoomOut') {
+      // Determine the current tab
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        const currentTabId = tabs[0].id
+        // Get the current zoom factor
+        chrome.tabs.getZoom(currentTabId, function (currentZoomFactor) {
+          if ((request.action === 'zoomIn' && !zin) || (request.action === 'zoomOut' && !zout)) {
+            sendResponse({ success: true, newZoomFactor: currentZoomFactor })
+            return true
+          }
+
+          let adjustment = request.action === 'zoomIn' ? 0.1 : -0.1
+          let newZoomFactor = currentZoomFactor + adjustment
+          // Set the new zoom factor
+          chrome.tabs.setZoom(currentTabId, newZoomFactor, function () {
+            if (chrome.runtime.lastError) {
+              console.error('Error setting zoom:', chrome.runtime.lastError)
+              sendResponse({ error: chrome.runtime.lastError.message })
+            } else {
+              console.log(`Zoom level set to ${newZoomFactor}`)
+              sendResponse({ success: true, newZoomFactor: newZoomFactor })
+            }
+          })
+        })
+      })
+      // Indicate that sendResponse will be called asynchronously
+      return true
     }
   })
 })

@@ -4,6 +4,53 @@
   }
 }
 
+.h1-style {
+  font-size: 2rem; /* Existing style */
+  line-height: 2.4rem; /* Existing style */
+  padding: 10px; /* Add some padding around the text */
+  border: 2px solid #61dafb; /* Add a solid border with the theme color */
+  display: inline-block; /* This makes the border wrap around the text */
+  border-radius: 10px; /* Optional: Adds rounded corners to the border */
+  background-color: rgba(97, 218, 251, 0.1); /* Optional: Adds a subtle background color */
+  box-shadow: 0 0 10px rgba(97, 218, 251, 0.5); /* Optional: Adds a soft glow effect */
+  text-shadow: 1px 1px 2px #000; /* Optional: Adds a slight shadow to the text for better readability */
+}
+
+/* Adjust the main container */
+main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* justify-content: space-between; Changed to manage space distribution */
+  margin: 0 auto;
+  padding: 1em;
+  overflow: auto; /* Allows scrolling only if content exceeds the viewport, consider changing based on your needs */
+  min-height: 100%;
+  /* width: max-content; */
+  /* height: 2000rem; */
+}
+
+.popup-footer {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  /* right: 0; */
+  font-size: 10px;
+  color: grey;
+  padding: 10px;
+  margin-top: 1.5rem;
+  margin-bottom: 5px;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.main-content::-webkit-scrollbar {
+  display: none;
+}
+
 main {
   text-align: center;
   padding: 1em;
@@ -16,33 +63,7 @@ h3 {
   font-size: 1.5rem;
   font-weight: 200;
   line-height: 1.2rem;
-  margin: 2rem auto;
-}
-
-.calc {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 2rem;
-
-  & > button {
-    font-size: 1rem;
-    padding: 0.5rem 1rem;
-    border: 1px solid #61dafb;
-    border-radius: 0.25rem;
-    background-color: transparent;
-    color: #61dafb;
-    cursor: pointer;
-    outline: none;
-
-    width: 3rem;
-    margin: 0 a;
-  }
-
-  & > label {
-    font-size: 1.5rem;
-    margin: 0 1rem;
-  }
+  margin: 1rem auto;
 }
 
 a {
@@ -54,17 +75,9 @@ a {
 
 .text-style {
   color: #61dafb;
-  text-transform: uppercase;
+  /* text-transform: uppercase; */
   font-weight: 200;
-  margin: 2rem auto;
-  text-align: center;
-}
-
-.text-style {
-  color: #61dafb;
-  text-transform: uppercase;
-  font-weight: 200;
-  margin: 1rem auto; /* Adjusted for more standard spacing */
+  margin: 1rem auto;
   text-align: center;
 }
 
@@ -84,6 +97,7 @@ a {
 }
 
 .p-style {
+  margin-top: -1rem;
   font-size: 1rem; /* Standard readable size for paragraph */
   line-height: 1.4rem; /* Comfortable reading line height */
   text-transform: none; /* Remove uppercase for paragraph for readability */
@@ -93,5 +107,5 @@ a {
 header,
 h2,
 section {
-  margin: 1.5rem auto;
+  margin: 1rem auto;
 }
