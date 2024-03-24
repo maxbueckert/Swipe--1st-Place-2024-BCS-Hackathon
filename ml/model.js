@@ -30,32 +30,46 @@ export async function getModel() {
     columns: false, 
   });
   
-  // Read the CSV file and parse its contents
-  let input = [];
-  let output = [];
-  
-  fs.createReadStream(csvFilePath)
-    .pipe(parser)
-    .on('data', async (row) => {
-      // Process each row here
-      let outputvals = row[0].split(';').map((item)=>parseInt(item));
-      let inputvals = row[1].split(';').map((item)=>parseInt(item));
-      if (outputvals.length === 6 && inputvals.length === 42) {
-        output.push(outputvals);
-        input.push(inputvals);
-      }
+  const model = await processCSVAndTrainModel(csvFilePath, parser);
+  console.log('DONE');
+  return model;
+}
 
-      console.log(outputvals.length);
-      console.log(inputvals.length);
-    })
-    .on('end', async () => {
-      console.log('CSV file has been processed');
-      console.log(input.length)
-      console.log(output.length)
-      let model = await getTrainedModel(input, output);
-      return model;
-    });
-    console.log('DONE');
+async function processCSVAndTrainModel(csvFilePath, parser) {
+  // Return a new promise that resolves with the model
+  return new Promise((resolve, reject) => {
+    const output = [];
+    const input = [];
+    
+    fs.createReadStream(csvFilePath)
+      .pipe(parser)
+      .on('data', (row) => {
+        // Process each row here synchronously
+        let outputvals = row[0].split(';').map((item) => parseInt(item));
+        let inputvals = row[1].split(';').map((item) => parseInt(item));
+        if (outputvals.length === 6 && inputvals.length === 42) {
+          output.push(outputvals);
+          input.push(inputvals);
+        }
+
+        console.log(outputvals.length);
+        console.log(inputvals.length);
+      })
+      .on('end', async () => {
+        console.log('CSV file has been processed');
+        console.log(input.length)
+        console.log(output.length)
+        try {
+          let model = await getTrainedModel(input, output);
+          resolve(model); // Resolve the promise with the trained model
+        } catch (error) {
+          reject(error); // Reject the promise if there's an error
+        }
+      })
+      .on('error', (error) => {
+        reject(error); // Make sure to catch and reject on stream errors as well
+      });
+  });
 }
 
 async function getTrainedModel(input, output) {
@@ -90,6 +104,7 @@ async function trainModel(model, data) {
   console.log('Model training complete.');
 }
 
+console.log("start");
 let model = await getModel();
 console.log(model);
 console.log('here')
