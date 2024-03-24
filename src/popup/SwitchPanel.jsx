@@ -14,41 +14,54 @@ import SwipeUpAltIcon from '@mui/icons-material/SwipeUpAlt'
 import { Preview, PreviewTwoTone } from '@mui/icons-material'
 
 export default function SwitchListSecondary() {
-  const [left, setLeft] = React.useState(false)
-  const [right, setRight] = React.useState(false)
-  const [up, setUp] = React.useState(false)
-  const [down, setDown] = React.useState(false)
+  const [left, setLeft] = React.useState(null)
+  const [right, setRight] = React.useState(null)
+  const [up, setUp] = React.useState(null)
+  const [down, setDown] = React.useState(null)
+  const [firstRender, setFirstRender] = React.useState(true)
+
+  //   console.log('here')
 
   // Change global state
   React.useEffect(() => {
-    chrome.storage.local.set({ left, right, up, down })
+    console.log('sending')
+    const changeState = async () => {
+      if (left !== null && right !== null && up !== null && down !== null) {
+        chrome.storage.sync.set({ left: left, right: right, up: up, down: down }, function () {
+          if (chrome.runtime.lastError) {
+            console.log(`Error setting values: ${chrome.runtime.lastError}`)
+          }
+        })
+        console.log('sent')
+        const result = chrome.storage.sync.get(['left', 'right', 'up', 'down'], (result) => {
+          console.log('sent result')
+          console.log(result)
+        })
+      }
+    }
+    changeState()
   }, [left, right, up, down])
 
-  // Initial Sync With Global State
   React.useEffect(() => {
-    // Initial sync from storage
-    chrome.storage.local.get(['left', 'right', 'up', 'down'], (result) => {
-      setLeft(result.left || false)
-      setRight(result.right || false)
-      setUp(result.up || false)
-      setDown(result.down || false)
-    })
-
-    // Listen for changes
-    chrome.storage.onChanged.addListener((changes, namespace) => {
-      for (let [key, { newValue }] of Object.entries(changes)) {
-        if (key === 'left') setLeft(newValue)
-        if (key === 'right') setRight(newValue)
-        if (key === 'up') setUp(newValue)
-        if (key === 'down') setDown(newValue)
+    const restoreState = async () => {
+      if (firstRender) {
+        console.log('initial retrieve async')
+        const result = chrome.storage.sync.get(['left', 'right', 'up', 'down'], (result) => {
+          console.log('fresh result')
+          console.log(result)
+          setLeft(result.left || false)
+          setRight(result.right || false)
+          setUp(result.up || false)
+          setDown(result.down || false)
+        })
       }
-    })
+      setFirstRender(false)
+    }
+    restoreState()
+  }, [firstRender])
+  //   console.log(chrome.storage.local.set({ left, right, up, down }))
 
-    // Cleanup listener
-    return () => chrome.storage.onChanged.removeListener(listener)
-  }, [])
-
-  return (
+  return up === null || down === null || right === null || left === null ? null : (
     <List sx={{ width: '100%', maxWidth: 360 }}>
       <ListItem>
         <ListItemIcon>
@@ -61,7 +74,10 @@ export default function SwitchListSecondary() {
         />
         <Switch
           edge="end"
-          onChange={() => setLeft((prev) => !prev)}
+          onChange={() => {
+            setLeft((prev) => !prev)
+            console.log('left')
+          }}
           checked={left}
           inputProps={{
             'aria-labelledby': 'switch-list-label-wifi',
@@ -89,8 +105,8 @@ export default function SwitchListSecondary() {
         <ListItemText sx={{ color: '#61dafb' }} id="switch-list-label-wifi" primary="Scroll Down" />
         <Switch
           edge="end"
-          onChange={() => setUp((prev) => !prev)}
-          checked={up}
+          onChange={() => setDown((prev) => !prev)}
+          checked={down}
           inputProps={{
             'aria-labelledby': 'switch-list-label-wifi',
           }}
@@ -103,8 +119,8 @@ export default function SwitchListSecondary() {
         <ListItemText sx={{ color: '#61dafb' }} id="switch-list-label-wifi" primary="Scroll Up" />
         <Switch
           edge="end"
-          onChange={() => setDown((prev) => !prev)}
-          checked={down}
+          onChange={() => setUp((prev) => !prev)}
+          checked={up}
           inputProps={{
             'aria-labelledby': 'switch-list-label-wifi',
           }}
